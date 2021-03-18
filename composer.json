@@ -1,0 +1,35 @@
+{
+    "name": "jamosaur/vali",
+    "description": "Docker for running a Laravel application",
+    "keywords": [
+        "laravel",
+        "docker"
+    ],
+    "license": "MIT",
+    "require": {
+        "php": "^7.3|^8.0",
+        "illuminate/contracts": "^8.0|^9.0",
+        "illuminate/console": "^8.0|^9.0",
+        "illuminate/support": "^8.0|^9.0"
+    },
+    "bin": [
+        "bin/vali"
+    ],
+    "autoload": {
+        "psr-4": {
+            "Jamosaur\\Vali\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Jamosaur\\Vali\\ValiServiceProvider"
+            ]
+        }
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}

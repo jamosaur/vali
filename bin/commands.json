@@ -1,0 +1,9 @@
+{
+    "help": "Show this output.",
+    "up": "Start the containers (use -d to run in background).",
+    "php": "Run a PHP command.",
+    "artisan": "Run an artisan command.",
+    "down": "Stop all of the containers.",
+    "composer": "Run a composer command.",
+    "build": "Builds the container"
+}

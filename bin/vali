@@ -1,0 +1,124 @@
+#!/usr/bin/env bash
+
+VERSION="0.0.1"
+UNAME="$(uname -s)"
+
+WHITE='\e[1;37m'
+MAGENTABOLD='\e[1;35m'
+NC='\e[0m'
+
+case "$UNAME" in
+Linux*) MACHINE=linux ;;
+Darwin*) MACHINE=mac ;;
+*) MACHINE="UNKNOWN" ;;
+esac
+
+if [ "$MACHINE" == "UNKNOWN" ]; then
+  echo "Unsupported OS [$UNAME]" >&2
+  exit 1
+fi
+
+if ! command -v jq &>/dev/null; then
+  echo -e "${WHITE}jq is required to use vali.{$NC}" >&2
+
+  exit 1
+fi
+
+if [ -f "commands.json" ]; then
+    commandsfile="commands.json"
+elif [ -f "$(dirname "$0")/commands.json" ]; then
+    commandsfile="$(dirname "$0")/commands.json"
+elif [ -f "$(dirname "$0")/../jamosaur/vali/bin/commands.json" ]; then
+    commandsfile="$(dirname "$0")/../jamosaur/vali/bin/commands.json"
+fi
+
+# Load the commands and help text
+declare -A HELPTEXT
+while IFS="=" read -r key value; do
+  HELPTEXT[$key]="$value"
+done < <(jq -r 'to_entries|map("\(.key)=\(.value|tostring)")|.[]' $commandsfile)
+
+export APP_PORT=${APP_PORT:-80}
+export APP_SERVICE=${APP_SERVICE:-"vali.test"}
+export DB_PORT=${DB_PORT:-3306}
+export WWWUSER=${WWWUSER:-$UID}
+export WWWGROUP=${WWWGROUP:-$(id -g)}
+
+# Check to see if docker is running
+if ! docker info >/dev/null 2>&1; then
+  echo -e "${WHITE}Docker is not running, please start docker!${NC}" >&2
+
+  exit 1
+fi
+
+
+# Check if vali is running
+if docker-compose ps | grep 'Exit'; then
+  echo -e "${WHITE}Shutting down old vali processes...${NC}" >&2
+
+  docker-compose down > /dev/null 2>&1
+
+  RUN="false"
+elif [ -n "$(docker-compose ps -q)" ]; then
+  RUN="true"
+else
+  RUN="false"
+fi
+
+function show_help() {
+  echo -e "${MAGENTABOLD}Vali $VERSION${NC}"
+  if [ $# -ne 0 ]; then
+    echo -e $1 >&2
+  fi
+  echo ""
+  echo -e "${WHITE}Available commands:${NC}"
+  for i in "${!HELPTEXT[@]}"; do
+    echo -e "${MAGENTABOLD}$i - ${WHITE}${HELPTEXT[$i]}${NC}"
+  done
+
+  exit 1
+}
+
+if [ $# -gt 0 ]; then
+  MATCH=0
+
+  # Check to see if the command passed in exists in the command list
+  for cmd in "${!HELPTEXT[@]}"; do
+    if [[ "$cmd" == "$1" ]]; then
+      # There is a match, so we break from the loop and set MATCH to 1
+      MATCH=1
+      break
+    fi
+  done
+
+  if [ $MATCH -eq 0 ]; then
+    show_help "${WHITE}Unrecognised command: ${MAGENTABOLD}$1${NC}"
+  fi
+
+  # Load the laravel .env if it exists so we have access to environment variables.
+  if [ -f ./.env ]; then
+    source ./.env
+  fi
+
+  if [ "$1" == "up" ]; then
+    shift 1
+    docker-compose up "$@"
+    RUN="true"
+  elif [ "$1" == "down" ]; then
+    docker-compose down
+  fi
+
+  if [ "$1" == "build" ]; then
+      shift 1
+      docker-compose build
+      RUN="true"
+  fi
+
+  if [ "$RUN" == "false" ]; then
+    echo -e "${MAGENTABOLD}Vali${WHITE} isn't running." >&2
+
+    exit 1
+  fi
+else
+  show_help
+fi

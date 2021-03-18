@@ -1,0 +1,167 @@
+#!/usr/bin/env bash
+
+VERSION="1.0.0"
+UNAME="$(uname -s)"
+
+WHITE='\033[1;37m'
+MAGENTABOLD='\033[1;35m'
+NC='\033[0m'
+
+function white_text() {
+    echo -e "${WHITE}$1${NC}"
+}
+function help_string() {
+    echo -e "${MAGENTABOLD}$1 ${WHITE}$2${NC}"
+}
+
+case "$UNAME" in
+Linux*) MACHINE=linux ;;
+Darwin*) MACHINE=mac ;;
+*) MACHINE="UNKNOWN" ;;
+esac
+
+if [ "$MACHINE" == "UNKNOWN" ]; then
+    echo "Unsupported OS [$UNAME]" >&2
+    exit 1
+fi
+
+export APP_PORT=${APP_PORT:-80}
+export APP_HTTPS_PORT=${APP_HTTPS_PORT:-443}
+export APP_SERVICE=${APP_SERVICE:-"vali.test"}
+export DB_PORT=${DB_PORT:-3306}
+export WWWUSER=${WWWUSER:-$UID}
+export WWWGROUP=${WWWGROUP:-$(id -g)}
+
+# Check to see if docker is running
+if ! docker info >/dev/null 2>&1; then
+    echo -e "${WHITE}Docker is not running, please start docker!${NC}" >&2
+
+    exit 1
+fi
+
+function check_running() {
+    # First check to see if we have vali installed; if not, tell the user.
+    if [ ! -f docker-compose.yml ]; then
+        help_string "No docker-composer.yml found." "Please run php artisan vali:install"
+        exit 1
+    fi
+
+    if docker-compose ps | grep 'Exit'; then
+        white_text "Shutting down old vali processes..."
+
+        docker-compose down >/dev/null 2>&1
+    elif [ -z "$(docker-compose ps -q)" ]; then
+        help_string "Vali isn't running," "run the up command first"
+        exit 1
+    fi
+}
+
+function show_help() {
+    show_version
+    echo ""
+    white_text "Available commands"
+    help_string "help         " "Show this output"
+    help_string "certificates " "Create HTTPS certificates."
+    help_string "up           " "Start the containers"
+    help_string "up -d        " "Start the containers in the background"
+    help_string "down         " "Stop all of the running containers"
+    help_string "build        " "Build all of the containers"
+    help_string "php          " "Run a PHP command in the container"
+    help_string "artisan      " "Run an artisan command. e.g. vali artisan test"
+    help_string "composer     " "Run composer in the container"
+    help_string "migrate      " "Migrate database"
+    help_string "mfs          " "Refresh the database and seed"
+    help_string "test         " "Run tests via artisan"
+    help_string "tinker       " "Launch a tinker session in the container"
+    help_string "shell        " "Launch a bash session in the container"
+    help_string "rootshell    " "Launch a root bash session in the container"
+}
+
+function check_for_mkcert() {
+    if ! command -v mkcert &>/dev/null; then
+        help_string "mkcert" "is required to do this. https://github.com/FiloSottile/mkcert"
+        exit 1;
+    fi
+}
+
+function show_version() {
+    help_string "Vali" "$VERSION"
+}
+
+if [ $# -gt 0 ]; then
+    # Load up the laravel env file so we can use the variables.
+    if [ -f ./.env ]; then
+        source ./.env
+    fi
+
+    # Check for commands.
+    if [[ "$1" == "help" ]]; then
+        show_help
+        exit 0
+    elif [[ "$1" == "version" ]]; then
+        show_version
+        exit 0
+    elif [[ "$1" == "up" ]]; then
+        shift 1
+        docker-compose up "$@"
+    elif [[ "$1" == "down" ]]; then
+        docker-compose down
+    elif [[ "$1" == "build" ]]; then
+        shift 1
+        docker-compose build "$@"
+    elif [[ "$1" == "certificates" ]]; then
+        check_for_mkcert
+        mkdir -p certificates
+        white_text "What domain would you like to use for the certificate?"
+        read -p 'Domain: ' cert
+        mkcert -key-file certificates/server.key -cert-file certificates/server.crt "$cert" "*.$cert"
+    elif [[ "$1" == "artisan" ]] || [[ "$1" == "art" ]] || [[ "$1" == "a" ]]; then
+        shift 1
+        check_running
+        docker-compose exec \
+            -u vali
+        "$APP_SERVICE" \
+            php artisan "$@"
+    elif [[ "$1" == "migrate" ]]; then
+        shift 1
+        check_running
+        docker-compose exec \
+            -u vali \
+            "$APP_SERVICE" \
+            php artisan migrate "$@"
+    elif [[ "$1" == "mfs" ]]; then
+        check_running
+        docker-compose exec \
+            -u vali \
+            "$APP_SERVICE" \
+            php artisan migrate:fresh --seed
+    elif [[ "$1" == "test" ]]; then
+        shift 1
+        check_running
+        docker-compose exec \
+            -u vali \
+            "$APP_SERVICE" \
+            php artisan test "$@"
+    elif [[ "$1" == "tinker" ]]; then
+        check_running
+        docker-compose exec \
+            -u vali \
+            "$APP_SERVICE" \
+            php artisan tinker
+    elif [[ "$1" == "shell" ]]; then
+        check_running
+        docker-compose exec \
+            -u vali \
+            "$APP_SERVICE" \
+            bash
+    elif [[ "$1" == "rootshell" ]]; then
+        check_running
+        docker-compose exec \
+            "$APP_SERVICE" \
+            bash
+    else
+        show_help
+    fi
+else
+    show_help
+fi

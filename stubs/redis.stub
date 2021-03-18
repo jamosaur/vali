@@ -1,0 +1,10 @@
+    redis:
+        image: 'redis:alpine'
+        ports:
+            - '${FORWARD_REDIS_PORT:-6379}:6379'
+        volumes:
+            - 'valiredis:/data'
+        networks:
+            - vali
+        healthcheck:
+            test: ["CMD", "redis-cli", "ping"]

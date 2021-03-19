@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Jamosaur\Vali;
 
 use Jamosaur\Vali\Commands\Install;
+use Jamosaur\Vali\Commands\Publish;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Contracts\Support\DeferrableProvider;
 
@@ -16,23 +17,28 @@ class ValiServiceProvider extends ServiceProvider implements DeferrableProvider
         $this->configurePublishing();
     }
 
+    /**
+     * @return string[]
+     */
     public function provides()
     {
         return [
             Install::class,
+            Publish::class,
         ];
     }
 
-    protected function registerCommands()
+    protected function registerCommands(): void
     {
         if ($this->app->runningInConsole()) {
             $this->commands([
                 Install::class,
+                Publish::class,
             ]);
         }
     }
 
-    protected function configurePublishing()
+    protected function configurePublishing(): void
     {
         if ($this->app->runningInConsole()) {
             $this->publishes(

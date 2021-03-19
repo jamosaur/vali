@@ -161,6 +161,20 @@ if [ $# -gt 0 ]; then
             "$APP_SERVICE" \
             php artisan test "$@"
     fi
+
+    if [ "$1" == "tinker" ]; then
+        docker-compose exec \
+            -u vali \
+            "$APP_SERVICE" \
+            php artisan tinker
+    fi
+
+    if [ "$1" == "shell" ]; then
+        docker-compose exec \
+            -u vali \
+            "$APP_SERVICE" \
+            bash
+    fi
 else
     show_help
 fi

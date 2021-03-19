@@ -5,5 +5,8 @@
     "artisan": "(art|a) Run an artisan command.",
     "down": "Stop all of the containers.",
     "composer": "Run a composer command.",
-    "build": "Builds the container"
+    "build": "Builds the container (--no-cache)",
+    "migrate": "Migrate database",
+    "mfs": "Migrate a fresh database and seed",
+    "test": "Run tests via artisan"
 }

@@ -112,8 +112,14 @@ if [ $# -gt 0 ]; then
 
     if [ "$1" == "build" ]; then
         shift 1
-        docker-compose build
+        docker-compose build "$@"
         RUN="true"
+    fi
+
+    if [ "$RUN" == "false" ]; then
+        echo -e "${MAGENTABOLD}Vali${WHITE} isn't running." >&2
+
+        exit 1
     fi
 
     if [ "$1" == "php" ]; then
@@ -132,10 +138,28 @@ if [ $# -gt 0 ]; then
             php artisan "$@"
     fi
 
-    if [ "$RUN" == "false" ]; then
-        echo -e "${MAGENTABOLD}Vali${WHITE} isn't running." >&2
+    if [ "$1" == "migrate" ]; then
+        shift 1
+        docker-compose exec \
+            -u vali \
+            "$APP_SERVICE" \
+            php artisan migrate
+    fi
 
-        exit 1
+    if [ "$1" == "mfs" ]; then
+        shift 1
+        docker-compose exec \
+            -u vali \
+            "$APP_SERVICE" \
+            php artisan migrate:fresh --seed
+    fi
+
+    if [ "$1" == "test" ]; then
+        shift 1
+        docker-compose exec \
+            -u vali \
+            "$APP_SERVICE" \
+            php artisan test "$@"
     fi
 else
     show_help

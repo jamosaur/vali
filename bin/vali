@@ -3,9 +3,9 @@
 VERSION="0.0.1"
 UNAME="$(uname -s)"
 
-WHITE='\e[1;37m'
-MAGENTABOLD='\e[1;35m'
-NC='\e[0m'
+WHITE='\033[1;37m'
+MAGENTABOLD='\033[1;35m'
+NC='\033[0m'
 
 case "$UNAME" in
 Linux*) MACHINE=linux ;;
@@ -19,7 +19,7 @@ if [ "$MACHINE" == "UNKNOWN" ]; then
 fi
 
 if ! command -v jq &>/dev/null; then
-    echo -e "${WHITE}jq is required to use vali.{$NC}" >&2
+    echo -e "${WHITE}jq is required to use vali.${NC}" >&2
 
     exit 1
 fi

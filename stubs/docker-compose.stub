@@ -13,7 +13,8 @@ services:
             WWWUSER: '${WWWUSER}'
         volumes:
             - '.:/var/www/html'
-            - './vendor/jamosaur/vali/runtimes/8.0/nginx/sites-available:/etc/nginx/sites-available'
+            - './config/nginx-config.conf:/etc/nginx/sites-available/default'
+{{httpsvolume}}
         networks:
             - vali
 {{depends}}

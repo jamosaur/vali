@@ -98,11 +98,9 @@ class Install extends Command
     {
         $env = file_get_contents($this->laravel->basePath('.env'));
 
-        $env = str_replace(
-            ['DB_HOST=127.0.0.1', 'REDIS_HOST=127.0.0.1'],
-            ['DB_HOST=mysql', 'REDIS_HOST=redis'],
-            $env
-        );
+        $env = str_replace(['DB_HOST=127.0.0.1', 'REDIS_HOST=127.0.0.1', 'DB_USERNAME=root', 'DB_PASSWORD='],
+            ['DB_HOST=mysql', 'REDIS_HOST=redis', "DB_USERNAME=sail", "DB_PASSWORD=password"],
+            $env);
 
         file_put_contents($this->laravel->basePath('.env'), $env);
     }

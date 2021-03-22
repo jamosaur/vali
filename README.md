@@ -4,7 +4,16 @@
 [![Software License][ico-license]](LICENSE.md)
 [![Total Downloads][ico-downloads]][link-downloads]
 
-An easy way to get started with docker in your laravel installation with local https support.
+An easy way to get started with docker in your laravel installation with local https support. Heavily inspired by [Laravel Sail](https://laravel.com/docs/8.x/sail).
+
+Services included:
+
+- nginx + php8.0-fpm
+- mysql 8
+- redis
+- mailhog
+
+---
 
 ## Requirements
 

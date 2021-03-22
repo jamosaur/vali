@@ -73,7 +73,7 @@ $ mkcert -key-file certificates/server.key -cert-file certificates/server.crt va
 
 ## Usage
 
-#### If you plan on using https locally, it is best to read through the [HTTPS](#using https) section first.
+**If you plan on using https locally, it is best to read through the `Using HTTPS` section above first.**
 
 Get started by running the `vali:install` artisan command.
 ```bash

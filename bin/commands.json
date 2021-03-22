@@ -10,5 +10,6 @@
     "mfs": "Migrate a fresh database and seed",
     "test": "Run tests via artisan",
     "tinker": "Launch tinker session",
-    "shell": "Launch a shell session"
+    "shell": "Launch a shell session",
+    "rootshell": "Launch a root shell"
 }

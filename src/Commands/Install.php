@@ -119,7 +119,7 @@ class Install extends Command
             foreach ($filesToCheck as $file) {
                 if (!file_exists($basePath . '/' . $file)) {
                     $this->error('Missing ' . $file);
-                    //$filesExist = false;
+                    $filesExist = false;
                 }
             }
             if (!$filesExist) {

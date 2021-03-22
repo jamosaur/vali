@@ -175,6 +175,12 @@ if [ $# -gt 0 ]; then
             "$APP_SERVICE" \
             bash
     fi
+
+    if [ "$1" == "rootshell" ]; then
+        docker-compose exec \
+            "$APP_SERVICE" \
+            bash
+    fi
 else
     show_help
 fi

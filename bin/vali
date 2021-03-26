@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-VERSION="1.0.2"
+VERSION="1.0.3"
 UNAME="$(uname -s)"
 
 WHITE='\033[1;37m'
@@ -69,6 +69,7 @@ function show_help() {
     help_string "php          " "Run a PHP command in the container"
     help_string "artisan      " "Run an artisan command. e.g. vali artisan test"
     help_string "composer     " "Run composer in the container"
+    help_string "du           " "Run composer du in the container"
     help_string "migrate      " "Migrate database"
     help_string "mfs          " "Refresh the database and seed"
     help_string "test         " "Run tests via artisan"
@@ -122,6 +123,19 @@ if [ $# -gt 0 ]; then
             -u vali \
         "$APP_SERVICE" \
             php artisan "$@"
+    elif [[ "$1" == "composer" ]]; then
+        shift 1
+        check_running
+        docker-compose exec \
+            -u vali \
+        "$APP_SERVICE" \
+            composer "$@"
+    elif [[ "$1" == "du" ]]; then
+        check_running
+        docker-compose exec \
+            -u vali \
+        "$APP_SERVICE" \
+            composer du
     elif [[ "$1" == "migrate" ]]; then
         shift 1
         check_running

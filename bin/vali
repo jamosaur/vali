@@ -46,11 +46,11 @@ function check_running() {
         exit 1
     fi
 
-    if docker-compose ps | grep 'Exit'; then
+    if docker compose ps | grep 'Exit'; then
         white_text "Shutting down old vali processes..."
 
-        docker-compose down >/dev/null 2>&1
-    elif [ -z "$(docker-compose ps -q)" ]; then
+        docker compose down >/dev/null 2>&1
+    elif [ -z "$(docker compose ps -q)" ]; then
         help_string "Vali isn't running," "run the up command first"
         exit 1
     fi
@@ -104,12 +104,12 @@ if [ $# -gt 0 ]; then
         exit 0
     elif [[ "$1" == "up" ]]; then
         shift 1
-        docker-compose up "$@"
+        docker compose up "$@"
     elif [[ "$1" == "down" ]]; then
-        docker-compose down
+        docker compose down
     elif [[ "$1" == "build" ]]; then
         shift 1
-        docker-compose build "$@"
+        docker compose build "$@"
     elif [[ "$1" == "certificates" ]]; then
         check_for_mkcert
         mkdir -p certificates
@@ -119,58 +119,58 @@ if [ $# -gt 0 ]; then
     elif [[ "$1" == "artisan" ]] || [[ "$1" == "art" ]] || [[ "$1" == "a" ]]; then
         shift 1
         check_running
-        docker-compose exec \
+        docker compose exec \
             -u vali \
         "$APP_SERVICE" \
             php artisan "$@"
     elif [[ "$1" == "composer" ]]; then
         shift 1
         check_running
-        docker-compose exec \
+        docker compose exec \
             -u vali \
         "$APP_SERVICE" \
             composer "$@"
     elif [[ "$1" == "du" ]]; then
         check_running
-        docker-compose exec \
+        docker compose exec \
             -u vali \
         "$APP_SERVICE" \
             composer du
     elif [[ "$1" == "migrate" ]]; then
         shift 1
         check_running
-        docker-compose exec \
+        docker compose exec \
             -u vali \
             "$APP_SERVICE" \
             php artisan migrate "$@"
     elif [[ "$1" == "mfs" ]]; then
         check_running
-        docker-compose exec \
+        docker compose exec \
             -u vali \
             "$APP_SERVICE" \
             php artisan migrate:fresh --seed
     elif [[ "$1" == "test" ]]; then
         shift 1
         check_running
-        docker-compose exec \
+        docker compose exec \
             -u vali \
             "$APP_SERVICE" \
             php artisan test "$@"
     elif [[ "$1" == "tinker" ]]; then
         check_running
-        docker-compose exec \
+        docker compose exec \
             -u vali \
             "$APP_SERVICE" \
             php artisan tinker
     elif [[ "$1" == "shell" ]]; then
         check_running
-        docker-compose exec \
+        docker compose exec \
             -u vali \
             "$APP_SERVICE" \
             bash
     elif [[ "$1" == "rootshell" ]]; then
         check_running
-        docker-compose exec \
+        docker compose exec \
             "$APP_SERVICE" \
             bash
     else
